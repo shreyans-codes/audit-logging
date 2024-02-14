@@ -1,0 +1,3 @@
+18:36:36.848 [http-nio-8080-exec-1] INFO  c.s.A.Controller.AuditController - CR (ID: CR0001) created by Shreyans at 12-02-2024 (new state: false)
+18:37:47.270 [http-nio-8080-exec-5] INFO  c.s.A.Controller.AuditController - CR (ID: CR0001) updated from false to true by Shreyans at 12-02-2024
+18:38:13.064 [http-nio-8080-exec-6] INFO  c.s.A.Controller.AuditController - CR (ID: CR0001) deleted by Shreyans at 12-02-2024 (last state: true)
