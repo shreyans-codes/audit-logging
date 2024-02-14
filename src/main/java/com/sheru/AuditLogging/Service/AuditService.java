@@ -23,6 +23,7 @@ public class AuditService {
     public void createAudit(AuditModel auditModel) {
         String audit = String.format("%s (%s) created by %s at %s (new state: %s)", auditModel.getObject(), auditModel.getObject_details(), auditModel.getWho(), auditModel.getWhen(), auditModel.getNew_state());
         logger.info(audit);
+        System.out.println("test");
     }
 
 
