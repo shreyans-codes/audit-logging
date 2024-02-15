@@ -5,6 +5,17 @@
     <property name="CONSOLE_LOG_CHARSET" value="UTF-8"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
     <property name="LOG_FILE" value="log/app.log"/>
+    <!-- JSON FILE APPENDER -->
+    <appender name="JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>log/logFile.json</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover with compression -->
+            <fileNamePattern>log/logFile.%d{yyyy-MM-dd}.json.zip</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
     <!-- Console Appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -28,13 +39,16 @@
         </triggeringPolicy>
     </appender>
     <!-- Root Configuration -->
-    <root level="INFO">
-        <appender-ref ref="FILE" />
+    <root level="WARN">
         <appender-ref ref="CONSOLE" />
     </root>
-    <!-- Logger Configuration for com.sheru.AuditLogging.AuditLoggingApplication -->
-    <logger name="com.sheru.AuditLogging.AuditLoggingApplication" level="DEBUG">
-        <appender-ref ref="FILE" />
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+    <!-- Set the log level for your application's package to INFO -->
+    <logger name="com.sheru.AuditLogging.Controller.AuditController" level="INFO" additivity="false">
+        <appender-ref ref="JSON" />
+        <appender-ref ref="CONSOLE" />
     </logger>
 </configuration>
 
