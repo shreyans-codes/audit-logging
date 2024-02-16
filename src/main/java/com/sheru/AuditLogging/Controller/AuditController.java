@@ -2,6 +2,7 @@ package com.sheru.AuditLogging.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheru.AuditLogging.Model.AuditModel;
+import com.sheru.AuditLogging.Model.AuditSearchModel;
 import com.sheru.AuditLogging.Service.AuditService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,21 +36,27 @@ public class AuditController {
 
     @GetMapping("/read-logs")
     public ResponseEntity<?> readLogs() {
-        String logFilePath = "log/logFile.log";
-        List<Object> logEntries = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        try (BufferedReader reader = new BufferedReader(new FileReader(logFilePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String json = line.substring(1, line.length() - 1);
-                Object logEntry = objectMapper.readValue(json, Object.class);
-                logEntries.add(logEntry);
-            }
+        List<AuditModel> logEntries;
+        try {
+            logEntries = auditService.readLog("logFile.log");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error reading logs");
         }
 
         return ResponseEntity.ok(logEntries);
-
     }
+
+    @GetMapping("/find-in-logs")
+    public ResponseEntity<?> findInLogs(@RequestBody AuditSearchModel auditSearchModel) {
+        List<AuditModel> logEntries;
+        try {
+            logEntries = auditService.findInLogs(auditSearchModel.getTarget(), auditSearchModel.getTargetId());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error reading logs");
+        }
+        return ResponseEntity.ok(logEntries);
+    }
+
+
+
 }

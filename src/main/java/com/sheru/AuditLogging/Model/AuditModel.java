@@ -1,14 +1,14 @@
 package com.sheru.AuditLogging.Model;
 
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 
 @Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuditModel {
     String who;
     String when;
@@ -17,6 +17,7 @@ public class AuditModel {
     TargetDetails target_details;
     CRState prev_state;
     CRState new_state;
+
 
     @Override
     public String toString() {
