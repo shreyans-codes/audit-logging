@@ -18,7 +18,7 @@ public class CRState {
         return "{" +
                 "\"status\":" + status +
                 ", \"implementationStatus\":" + implementationStatus +
-                ", \"title\":\"" + title + '\"' +
+                ", \"title\":\"" + title+ '\"' +
                 ", \"description\":\"" + description + '\"' +
                 '}';
     }

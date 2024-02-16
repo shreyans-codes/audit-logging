@@ -7,13 +7,13 @@
     <property name="LOG_FILE" value="log/app.log"/>
     <!-- JSON FILE APPENDER -->
     <appender name="JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>log/logFile.json</file>
+        <file>log/logFile.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- Daily rollover with compression -->
-            <fileNamePattern>log/logFile.%d{yyyy-MM-dd}.json.zip</fileNamePattern>
+            <fileNamePattern>log/logFile.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
         </rollingPolicy>
         <encoder>
-            <pattern>%msg%n</pattern>
+            <pattern>[%msg]%n</pattern>
         </encoder>
     </appender>
     <!-- Console Appender -->
