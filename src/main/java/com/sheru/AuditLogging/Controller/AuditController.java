@@ -19,17 +19,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/audit")
 public class AuditController {
+
     @Autowired
     private AuditService auditService;
+
     @PostMapping("/cr-change")
     public ResponseEntity<?> performAudit(@RequestBody AuditModel auditModel) {
-        if(auditModel.getAction().equals("Update"))
-            auditService.updateAudit(auditModel);
-        else if(auditModel.getAction().equals("Delete"))
-            auditService.deleteAudit(auditModel);
-        else if(auditModel.getAction().equals("Create"))
-            auditService.createAudit(auditModel);
-        else
+        if (auditModel != null) {
+            auditService.logAudit(auditModel);
+        } else
             return ResponseEntity.badRequest().body("Invalid action passed");
         return ResponseEntity.ok("All ok");
     }
@@ -50,7 +48,7 @@ public class AuditController {
     public ResponseEntity<?> findInLogs(@RequestBody AuditSearchModel auditSearchModel) {
         List<AuditModel> logEntries;
         try {
-            logEntries = auditService.findInLogs(auditSearchModel.getTarget(), auditSearchModel.getTargetId());
+            logEntries = auditService.findInLogs(auditSearchModel.getFeature(), auditSearchModel.getFeatureId());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error reading logs");
         }

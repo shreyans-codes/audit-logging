@@ -7,17 +7,17 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TargetDetails {
+public class FeatureDetails {
     String id;
-    String name;
-    Integer frequency;
+    String field;
+    FeatureChanges feature_changes;
 
     @Override
     public String toString() {
         return "{" +
                 "\"id\":\"" + id + '\"' +
-                ", \"name\":\"" + name + '\"' +
-                ", \"frequency\":" + frequency +
+                ", \"field\":\"" + field + '\"' +
+                ", \"feature_changes\":" + feature_changes +
                 '}';
     }
 }

@@ -13,10 +13,8 @@ public class AuditModel {
     String who;
     String when;
     String action;
-    String target;
-    TargetDetails target_details;
-    CRState prev_state;
-    CRState new_state;
+    String feature;
+    FeatureDetails feature_details;
 
 
     @Override
@@ -25,10 +23,8 @@ public class AuditModel {
                 "\"who\":\"" + who + '\"' +
                 ", \"when\":\"" + when + '\"' +
                 ", \"action\":\"" + action + '\"' +
-                ", \"target\":\"" + target + '\"' +
-                ", \"target_details\":" + target_details +
-                ", \"prev_state\":" + prev_state +
-                ", \"new_state\":" + new_state +
+                ", \"feature\":\"" + feature + '\"' +
+                ", \"feature_details\":" + feature_details +
                 '}';
     }
 }

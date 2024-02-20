@@ -6,7 +6,9 @@ import com.sheru.AuditLogging.Controller.AuditController;
 import com.sheru.AuditLogging.Model.AuditModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -19,23 +21,36 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
 @Service
 public class AuditService {
+
+    @Autowired
+    private ObjectMapper objectMapper;
     private static final Logger logger = LoggerFactory.getLogger(AuditController.class);
 
-    public void updateAudit(AuditModel auditModel) {
-//        String audit = String.format("%s (%s) updated from %s to %s by %s at %s", auditModel.getTarget(), auditModel.getTarget_details(), auditModel.getPrev_state().getStatus(), auditModel.getNew_state().getStatus(), auditModel.getWho(), auditModel.getWhen());
-        logger.info(auditModel.toString());
+    public void logAudit(AuditModel auditModel) { logger.info(auditModel.toString()); }
+
+
+    @KafkaListener(topics = "${spring.kafka.consumer.topic}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumeMessage(String message) {
+        try {
+            AuditModel auditModel = deserializeMessage(message);
+            if (auditModel != null) {
+                logAudit(auditModel);
+            }
+        } catch (Exception e) {
+            System.out.println("Error consuming message from Kafka: {" + e.getMessage() + "}");
+        }
     }
 
-    public void deleteAudit(AuditModel auditModel) {
-//        String audit = String.format("%s (%s) deleted by %s at %s (last state: %s)", auditModel.getTarget(), auditModel.getTarget_details(), auditModel.getWho(), auditModel.getWhen(), auditModel.getPrev_state().getStatus());
-        logger.info(auditModel.toString());
-    }
-
-    public void createAudit(AuditModel auditModel) {
-//        String audit = String.format("%s (%s) created by %s at %s (new state: %s)", auditModel.getTarget(), auditModel.getTarget_details(), auditModel.getWho(), auditModel.getWhen(), auditModel.getNew_state().getStatus());
-        logger.info(auditModel.toString());
+    private AuditModel deserializeMessage(String message) {
+        try {
+            return  objectMapper.readValue(message, AuditModel.class);
+        } catch (JsonProcessingException e) {
+            System.out.println("Error deserializing messages: {" + e.getMessage() + "}");
+            return null;
+        }
     }
 
     public List<AuditModel> readLog(String fileName) {
@@ -50,7 +65,7 @@ public class AuditService {
                 logEntries.add(logEntry);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error reading logs: {" + e.getMessage() + "}");
         }
 
         return logEntries;
@@ -63,7 +78,7 @@ public class AuditService {
             paths.filter(Files::isRegularFile).forEach(file -> {
                 try {
                     List<AuditModel> logsWithinFile = readLog(file.getFileName().toString());
-                    searchResults.addAll(logsWithinFile.stream().filter(entry->target.equals(entry.getTarget()) && targetId.equals(entry.getTarget_details().getId())).toList());
+                    searchResults.addAll(logsWithinFile.stream().filter(entry->target.equals(entry.getFeature()) && targetId.equals(entry.getFeature_details().getId())).collect(Collectors.toList())  );
 
                 } catch (Exception e) {
                     e.printStackTrace();
