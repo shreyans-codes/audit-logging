@@ -8,8 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FeatureChanges {
-    Boolean prev_state;
-    Boolean new_state;
+    String prev_state;
+    String new_state;
 
     @Override
     public String toString() {

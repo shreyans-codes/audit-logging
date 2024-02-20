@@ -1,27 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration debug="true">
     <include resource="org/springframework/boot/logging/logback/default.xml"/>
-    <property name="CONSOLE_LOG_PATTERN" value="[%d] [%p-(%logger\) : %t] %class.%method-(%file:%line\)%m%n%n"/>
-    <property name="CONSOLE_LOG_CHARSET" value="UTF-8"/>
-    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <!-- OVERWRITING DEFAULT PROPERTY -->
     <property name="LOG_FILE" value="log/app.log"/>
     <!-- JSON FILE APPENDER -->
     <appender name="JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>log/logFile.log</file>
+        <file>logs/other.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- Daily rollover -->
-            <fileNamePattern>log/logFile.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>log/other.%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <pattern>[%msg]%n</pattern>
         </encoder>
     </appender>
-    <!-- Console Appender -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+
+    <!-- Define appender for CRITICAL logs -->
+    <appender name="CR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/CR/CR.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover -->
+            <fileNamePattern>logs/CR/CR.%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
         <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
-            <charset>${CONSOLE_LOG_CHARSET}</charset>
+            <pattern>[%msg]%n</pattern>
         </encoder>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator> <!-- Define an evaluator for the CRITICAL marker -->
+                <expression>marker.contains("CR")</expression>
+            </evaluator>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>NEUTRAL</OnMatch>
+        </filter>
+    </appender>
+
+    <!-- Define appender for IMPORTANT logs -->
+    <appender name="TASK_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/TASK/TASK.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover -->
+            <fileNamePattern>logs/TASK/TASK.%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <pattern>[%msg]%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator> <!-- Define an evaluator for the TASK marker -->
+                <expression>marker.contains("TASK")</expression>
+            </evaluator>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>NEUTRAL</OnMatch>
+        </filter>
     </appender>
     <!-- File Appender -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -38,17 +68,26 @@
             <MaxFileSize>100KB</MaxFileSize>
         </triggeringPolicy>
     </appender>
-    <!-- Root Configuration -->
-    <root level="WARN">
-        <appender-ref ref="CONSOLE" />
+
+    <!-- Default Spring Console Log -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+                <pattern>%d %green([%thread]) %highlight(%level) %logger{50} - %msg%n</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+    <root>
+        <appender-ref ref="CONSOLE"/>
     </root>
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE"/>
     </root>
     <!-- Set the log level for your application's package to INFO -->
     <logger name="com.sheru.AuditLogging.Controller.AuditController" level="INFO" additivity="false">
-        <appender-ref ref="JSON" />
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="JSON"/>
+        <appender-ref ref="CR_FILE"/>
+        <appender-ref ref="TASK_FILE"/>
+
     </logger>
 </configuration>
 

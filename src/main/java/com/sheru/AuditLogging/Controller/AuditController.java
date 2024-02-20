@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheru.AuditLogging.Model.AuditModel;
 import com.sheru.AuditLogging.Model.AuditSearchModel;
 import com.sheru.AuditLogging.Service.AuditService;
+import com.sheru.AuditLogging.Utils.LogLevels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class AuditController {
     @PostMapping("/cr-change")
     public ResponseEntity<?> performAudit(@RequestBody AuditModel auditModel) {
         if (auditModel != null) {
-            auditService.logAudit(auditModel);
+            auditService.logAudit(LogLevels.CR, auditModel);
         } else
             return ResponseEntity.badRequest().body("Invalid action passed");
         return ResponseEntity.ok("All ok");
@@ -36,7 +37,7 @@ public class AuditController {
     public ResponseEntity<?> readLogs() {
         List<AuditModel> logEntries;
         try {
-            logEntries = auditService.readLog("logFile.log");
+            logEntries = auditService.readLog("other.log");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error reading logs");
         }
