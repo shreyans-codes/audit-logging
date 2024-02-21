@@ -9,7 +9,6 @@ import ch.qos.logback.core.FileAppender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheru.AuditLogging.Model.AuditModel;
-import com.sheru.AuditLogging.Utils.LogLevels;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,7 @@ public class AuditService {
 
 
 
-    @KafkaListener(topics = "${spring.kafka.consumer.topic-cr}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${spring.kafka.consumer.topics}", groupId = "${spring.kafka.consumer.group-id}")
     public void readCRAuditMessage(String message) {
         try {
             AuditModel auditModel = deserializeMessage(message);
@@ -94,17 +93,6 @@ public class AuditService {
         }
     }
 
-    @KafkaListener(topics = "${spring.kafka.consumer.topic-task}", groupId = "${spring.kafka.consumer.group-id}")
-    public void readTaskAuditMessage(String message) {
-        try {
-            AuditModel auditModel = deserializeMessage(message);
-            if (auditModel != null) {
-                logAudit(LogLevels.TASK, auditModel);
-            }
-        } catch (Exception e) {
-            System.out.println("Error consuming message from Kafka: {" + e.getMessage() + "}");
-        }
-    }
 
     private AuditModel deserializeMessage(String message) {
         try {

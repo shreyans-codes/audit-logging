@@ -1,19 +1,12 @@
 package com.sheru.AuditLogging.Controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheru.AuditLogging.Model.AuditModel;
 import com.sheru.AuditLogging.Model.AuditSearchModel;
 import com.sheru.AuditLogging.Service.AuditService;
-import com.sheru.AuditLogging.Utils.LogLevels;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,15 +17,7 @@ public class AuditController {
     @Autowired
     private AuditService auditService;
 
-    @PostMapping("/cr-change")
-    public ResponseEntity<?> performAudit(@RequestBody AuditModel auditModel) {
-        if (auditModel != null) {
-            auditService.logAudit(LogLevels.CR, auditModel);
-        } else
-            return ResponseEntity.badRequest().body("Invalid action passed");
-        return ResponseEntity.ok("All ok");
-    }
-
+    // Todo: no need for read-logs end point
     @GetMapping("/read-logs")
     public ResponseEntity<?> readLogs() {
         List<AuditModel> logEntries;
