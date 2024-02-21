@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheru.AuditLogging.Model.AuditModel;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -33,27 +32,6 @@ public class AuditService {
     private ObjectMapper objectMapper;
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger("com.sheru.AuditLogging.Controller.AuditController");
-
-
-    public void logAudit(Marker level, AuditModel auditModel) {
-        updateLogFile(auditModel.getFeature_details().getId());
-        logger.info(level, auditModel.toString());
-    }
-
-    // Todo: skimming needed here
-    private void updateLogFile(String crFeatureId) {
-        FileAppender<?> fileAppender = (FileAppender<?>) logger.getAppender("CR_FILE");
-
-        if (fileAppender != null) {
-            String logFileName = "logs/CR/" + crFeatureId + ".log";
-            fileAppender.setFile(logFileName);
-            fileAppender.setAppend(true);
-            fileAppender.start();
-        } else {
-            System.out.println("CR_FILE appender not found!");
-        }
-    }
-
 
 
     @KafkaListener(topics = "${spring.kafka.consumer.topics}", groupId = "${spring.kafka.consumer.group-id}")

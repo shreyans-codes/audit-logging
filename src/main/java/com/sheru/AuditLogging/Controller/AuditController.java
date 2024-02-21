@@ -17,18 +17,6 @@ public class AuditController {
     @Autowired
     private AuditService auditService;
 
-    // Todo: no need for read-logs end point
-    @GetMapping("/read-logs")
-    public ResponseEntity<?> readLogs() {
-        List<AuditModel> logEntries;
-        try {
-            logEntries = auditService.readLog("CR0001.log");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error reading logs");
-        }
-
-        return ResponseEntity.ok(logEntries);
-    }
 
     @GetMapping("/find-logs")
     public ResponseEntity<?> findLogs(@RequestBody AuditSearchModel auditSearchModel) {
