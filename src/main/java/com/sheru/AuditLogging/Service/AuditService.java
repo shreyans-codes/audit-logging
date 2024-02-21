@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheru.AuditLogging.Model.AuditModel;
 import com.sheru.AuditLogging.Utils.LogLevels;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,12 +18,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,6 +32,7 @@ public class AuditService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
     private static final Logger logger = (Logger) LoggerFactory.getLogger("com.sheru.AuditLogging.Controller.AuditController");
 
 
@@ -43,8 +41,8 @@ public class AuditService {
         logger.info(level, auditModel.toString());
     }
 
+    // Todo: skimming needed here
     private void updateLogFile(String crFeatureId) {
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         FileAppender<?> fileAppender = (FileAppender<?>) logger.getAppender("CR_FILE");
 
         if (fileAppender != null) {
@@ -53,7 +51,6 @@ public class AuditService {
             fileAppender.setAppend(true);
             fileAppender.start();
         } else {
-            // Handle the case where the appender is not found
             System.out.println("CR_FILE appender not found!");
         }
     }
@@ -137,6 +134,7 @@ public class AuditService {
         return logEntries;
     }
 
+// TODO: read the file LIFO order
 
     public List<AuditModel> findLogs(String featureId, int pageSize, int pageNumber) {
         String directoryPath = "logs/";
