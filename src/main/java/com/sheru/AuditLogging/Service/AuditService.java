@@ -34,7 +34,7 @@ public class AuditService {
     private static final Logger logger = (Logger) LoggerFactory.getLogger("com.sheru.AuditLogging.Controller.AuditController");
 
 
-    @KafkaListener(topics = "${spring.kafka.consumer.topics}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${spring.kafka.consumer.topic-cr}", groupId = "${spring.kafka.consumer.group-id}")
     public void readCRAuditMessage(String message) {
         try {
             AuditModel auditModel = deserializeMessage(message);
