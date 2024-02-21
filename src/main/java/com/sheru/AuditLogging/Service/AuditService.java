@@ -18,10 +18,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,22 +39,7 @@ public class AuditService {
 
 
     public void logAudit(Marker level, AuditModel auditModel) {
-        updateLogFile(auditModel.getFeature_details().getId());
         logger.info(level, auditModel.toString());
-    }
-
-    // Todo: skimming needed here
-    private void updateLogFile(String crFeatureId) {
-        FileAppender<?> fileAppender = (FileAppender<?>) logger.getAppender("CR_FILE");
-
-        if (fileAppender != null) {
-            String logFileName = "logs/CR/" + crFeatureId + ".log";
-            fileAppender.setFile(logFileName);
-            fileAppender.setAppend(true);
-            fileAppender.start();
-        } else {
-            System.out.println("CR_FILE appender not found!");
-        }
     }
 
 
@@ -115,31 +102,8 @@ public class AuditService {
         }
     }
 
-    public List<AuditModel> readLog(String fileName) {
-        String directoryPath = "logs/";
-        String logFilePath = directoryPath + fileName;
-        List<AuditModel> logEntries = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        try (BufferedReader reader = new BufferedReader(new FileReader(logFilePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String json = line.substring(1, line.length() - 1);
-                AuditModel logEntry = objectMapper.readValue(json, AuditModel.class);
-                logEntries.add(logEntry);
-            }
-        } catch (Exception e) {
-            System.out.println("Error reading logs: {" + e.getMessage() + "}");
-        }
-
-        return logEntries;
-    }
-
-// TODO: read the file LIFO order
-
     public List<AuditModel> findLogs(String featureId, int pageSize, int pageNumber) {
         String directoryPath = "logs/";
-
-
         List<AuditModel> searchResults = new ArrayList<>();
         try (Stream<Path> paths = Files.walk(Paths.get(directoryPath))) {
             searchResults = paths
@@ -158,6 +122,57 @@ public class AuditService {
             logger.error("Directory access error", e);
         }
         return searchResults;
+    }
+
+    public List<AuditModel> readLog(String fileName) {
+        String directoryPath = "logs/";
+        String logFilePath = directoryPath + fileName;
+        List<AuditModel> logEntries = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try (RandomAccessFile file = new RandomAccessFile(logFilePath, "r")) {
+            long filePointer = file.length() - 1;
+            StringBuilder builder = new StringBuilder();
+
+            // Read the file from the end
+            while (filePointer >= 0) {
+                file.seek(filePointer);
+                char ch = (char) file.readByte();
+                if (ch == '\n') {
+                    // When a new line is found, process the accumulated line (if it's not empty)
+                    if (builder.length() > 0) {
+                        String logLine = builder.reverse().toString();
+                        String json = logLine.substring(1, logLine.length() - 1); // Adjust based on your log format
+                        try {
+                            AuditModel logEntry = objectMapper.readValue(json, AuditModel.class);
+                            logEntries.add(logEntry);
+                        } catch (Exception e) {
+                            System.err.println("Error parsing JSON: " + e.getMessage());
+                        }
+                        builder = new StringBuilder(); // Reset for the next line
+                    }
+                } else {
+                    builder.append(ch);
+                }
+                filePointer--;
+            }
+            // Process the last line if exists
+            if (builder.length() > 0) {
+                String logLine = builder.reverse().toString();
+                String json = logLine.substring(1, logLine.length() - 1); // Adjust based on your log format
+                try {
+                    AuditModel logEntry = objectMapper.readValue(json, AuditModel.class);
+                    logEntries.add(logEntry);
+                } catch (Exception e) {
+                    System.err.println("Error parsing JSON: " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error reading logs: " + e.getMessage());
+        }
+
+        // The list is reversed because we read the file from the end
+        return logEntries;
     }
 
 }
