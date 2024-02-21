@@ -37,24 +37,13 @@ public class AuditController {
     public ResponseEntity<?> readLogs() {
         List<AuditModel> logEntries;
         try {
-            logEntries = auditService.readLog("other.log");
+            logEntries = auditService.readLog("CR0001.log");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error reading logs");
         }
 
         return ResponseEntity.ok(logEntries);
     }
-
-//    @GetMapping("/find-in-logs")
-//    public ResponseEntity<?> findInLogs(@RequestBody AuditSearchModel auditSearchModel) {
-//        List<AuditModel> logEntries;
-//        try {
-//            logEntries = auditService.findInLogs(auditSearchModel.getFeature(), auditSearchModel.getFeatureId());
-//        } catch (Exception e) {
-//            return ResponseEntity.internalServerError().body("Error reading logs");
-//        }
-//        return ResponseEntity.ok(logEntries);
-//    }
 
     @GetMapping("/find-logs")
     public ResponseEntity<?> findLogs(@RequestBody AuditSearchModel auditSearchModel) {
@@ -66,7 +55,4 @@ public class AuditController {
         }
         return ResponseEntity.ok(logEntries);
     }
-
-
-
 }

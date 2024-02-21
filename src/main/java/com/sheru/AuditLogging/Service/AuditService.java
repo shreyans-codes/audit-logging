@@ -19,10 +19,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,12 +39,8 @@ public class AuditService {
 
 
     public void logAudit(Marker level, AuditModel auditModel) {
-        System.out.println(String.format("MDC cr-feature-id set to: %s", auditModel.getFeature_details().getId()));
-        MDC.put("cr-feature-id", auditModel.getFeature_details().getId());
-        System.out.println(String.format("MDC cr-feature-id set to: %s", MDC.get("cr-feature-id")));
         updateLogFile(auditModel.getFeature_details().getId());
         logger.info(level, auditModel.toString());
-        MDC.remove("cr-feature-id");
     }
 
     private void updateLogFile(String crFeatureId) {
@@ -66,7 +64,7 @@ public class AuditService {
     public void readCRAuditMessage(String message) {
         try {
             AuditModel auditModel = deserializeMessage(message);
-            if (auditModel != null) {
+            if (auditModel != null && auditModel.getFeature().equals("Control_Requirement")) {
                 String id = auditModel.getFeature_details().getId();
                 String loggerName = "dynamicLogger." + id;
 
@@ -139,28 +137,6 @@ public class AuditService {
         return logEntries;
     }
 
-    public List<AuditModel> findInLogs(String feature, String featureId) {
-        String directoryPath = "logs";
-        if (feature.equals("TASK"))
-            directoryPath = "logs/TASK";
-        else if (feature.equals("Control_Requirement"))
-            directoryPath = "logs/CR";
-        List<AuditModel> searchResults = new ArrayList<>();
-        try (Stream<Path> paths = Files.walk(Paths.get(directoryPath))) {
-            paths.filter(Files::isRegularFile).forEach(file -> {
-                try {
-                    List<AuditModel> logsWithinFile = readLog(file.getFileName().toString());
-                    searchResults.addAll(logsWithinFile.stream().filter(entry -> feature.equals(entry.getFeature()) && featureId.equals(entry.getFeature_details().getId())).collect(Collectors.toList()));
-                } catch (Exception e) {
-                    System.out.println(String.format("Internal file reading error finding feature: {} with ID: {}", feature, featureId));
-                }
-            });
-        } catch (Exception e) {
-            System.out.println(String.format("Directory access error while finding feature: {} with ID: {}", feature, featureId));
-        }
-        return searchResults;
-    }
-
 
     public List<AuditModel> findLogs(String featureId, int pageSize, int pageNumber) {
         String directoryPath = "logs/";
@@ -168,13 +144,11 @@ public class AuditService {
 
         List<AuditModel> searchResults = new ArrayList<>();
         try (Stream<Path> paths = Files.walk(Paths.get(directoryPath))) {
-            searchResults = paths                                         // TODO: pagination not working
+            searchResults = paths
                     .filter(Files::isRegularFile)
-                    .skip((long) (pageNumber - 1) * pageSize) // Skip to the starting index of the current page
-                    .limit(pageSize) // Limit the number of files to the page size
                     .flatMap(file -> {
                         try {
-                            return readLog(file.getFileName().toString()).stream();
+                            return readLog(file.getFileName().toString()).stream().skip((long) (pageNumber - 1) * pageSize).limit(pageSize);
                         } catch (Exception e) {
                             logger.error("Internal file reading error", e);
                             return Stream.empty();
