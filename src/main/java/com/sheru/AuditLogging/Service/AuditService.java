@@ -168,7 +168,7 @@ public class AuditService {
 
         List<AuditModel> searchResults = new ArrayList<>();
         try (Stream<Path> paths = Files.walk(Paths.get(directoryPath))) {
-            searchResults = paths
+            searchResults = paths                                         // TODO: pagination not working
                     .filter(Files::isRegularFile)
                     .skip((long) (pageNumber - 1) * pageSize) // Skip to the starting index of the current page
                     .limit(pageSize) // Limit the number of files to the page size
