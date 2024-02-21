@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuditSearchModel {
-    String feature;
     String featureId;
+    private int pageSize;
+    private int pageNumber;
 }

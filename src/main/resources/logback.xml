@@ -16,43 +16,7 @@
         </encoder>
     </appender>
 
-    <!-- Define appender for CRITICAL logs -->
-    <appender name="CR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/CR/CR.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- Daily rollover -->
-            <fileNamePattern>logs/CR/CR.%d{yyyy-MM-dd}.log</fileNamePattern>
-        </rollingPolicy>
-        <encoder>
-            <pattern>[%msg]%n</pattern>
-        </encoder>
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator> <!-- Define an evaluator for the CRITICAL marker -->
-                <expression>marker.contains("CR")</expression>
-            </evaluator>
-            <OnMismatch>DENY</OnMismatch>
-            <OnMatch>NEUTRAL</OnMatch>
-        </filter>
-    </appender>
 
-    <!-- Define appender for IMPORTANT logs -->
-    <appender name="TASK_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/TASK/TASK.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- Daily rollover -->
-            <fileNamePattern>logs/TASK/TASK.%d{yyyy-MM-dd}.log</fileNamePattern>
-        </rollingPolicy>
-        <encoder>
-            <pattern>[%msg]%n</pattern>
-        </encoder>
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator> <!-- Define an evaluator for the TASK marker -->
-                <expression>marker.contains("TASK")</expression>
-            </evaluator>
-            <OnMismatch>DENY</OnMismatch>
-            <OnMatch>NEUTRAL</OnMatch>
-        </filter>
-    </appender>
     <!-- File Appender -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder>
@@ -76,18 +40,19 @@
             <charset>utf8</charset>
         </encoder>
     </appender>
+
     <root>
         <appender-ref ref="CONSOLE"/>
     </root>
+
     <root level="INFO">
         <appender-ref ref="FILE"/>
     </root>
+
+
     <!-- Set the log level for your application's package to INFO -->
     <logger name="com.sheru.AuditLogging.Controller.AuditController" level="INFO" additivity="false">
         <appender-ref ref="JSON"/>
-        <appender-ref ref="CR_FILE"/>
-        <appender-ref ref="TASK_FILE"/>
-
     </logger>
 </configuration>
 

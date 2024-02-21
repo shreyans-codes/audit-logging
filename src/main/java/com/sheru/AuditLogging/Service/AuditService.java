@@ -1,19 +1,19 @@
 package com.sheru.AuditLogging.Service;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sheru.AuditLogging.Controller.AuditController;
 import com.sheru.AuditLogging.Model.AuditModel;
-import com.sheru.AuditLogging.Model.FeatureDetails;
 import com.sheru.AuditLogging.Utils.LogLevels;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -67,11 +67,35 @@ public class AuditService {
         try {
             AuditModel auditModel = deserializeMessage(message);
             if (auditModel != null) {
-                logAudit(LogLevels.CR, auditModel);
-            }
+                String id = auditModel.getFeature_details().getId();
+                String loggerName = "dynamicLogger." + id;
 
+                LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+                Logger dynamicLogger = loggerContext.getLogger(loggerName);
+
+                // Configure appender for this dynamic logger
+                FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+                fileAppender.setContext(loggerContext);
+                fileAppender.setFile("logs/" + id + ".log");
+
+                PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+                encoder.setPattern("[%msg]%n");
+                encoder.setContext(loggerContext);
+                encoder.start();
+
+                fileAppender.setEncoder(encoder);
+                fileAppender.start();
+
+                dynamicLogger.addAppender(fileAppender);
+                dynamicLogger.setLevel(Level.INFO);
+
+                dynamicLogger.info(auditModel.toString());
+
+                // Remove the appender to avoid resource leaks
+                dynamicLogger.detachAppender(fileAppender);
+            }
         } catch (Exception e) {
-            System.out.println("Error consuming message from Kafka: {" + e.getMessage() + "}");
+            logger.error("Error consuming message from Kafka", e);
         }
     }
 
@@ -97,7 +121,7 @@ public class AuditService {
     }
 
     public List<AuditModel> readLog(String fileName) {
-        String directoryPath = "logs";
+        String directoryPath = "logs/";
         String logFilePath = directoryPath + fileName;
         List<AuditModel> logEntries = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -133,6 +157,33 @@ public class AuditService {
             });
         } catch (Exception e) {
             System.out.println(String.format("Directory access error while finding feature: {} with ID: {}", feature, featureId));
+        }
+        return searchResults;
+    }
+
+
+    public List<AuditModel> findLogs(String featureId, int pageSize, int pageNumber) {
+        String directoryPath = "logs/";
+
+
+        List<AuditModel> searchResults = new ArrayList<>();
+        try (Stream<Path> paths = Files.walk(Paths.get(directoryPath))) {
+            searchResults = paths
+                    .filter(Files::isRegularFile)
+                    .skip((long) (pageNumber - 1) * pageSize) // Skip to the starting index of the current page
+                    .limit(pageSize) // Limit the number of files to the page size
+                    .flatMap(file -> {
+                        try {
+                            return readLog(file.getFileName().toString()).stream();
+                        } catch (Exception e) {
+                            logger.error("Internal file reading error", e);
+                            return Stream.empty();
+                        }
+                    })
+                    .filter(entry -> featureId.equals(entry.getFeature_details().getId()))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Directory access error", e);
         }
         return searchResults;
     }

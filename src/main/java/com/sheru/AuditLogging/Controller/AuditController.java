@@ -45,11 +45,22 @@ public class AuditController {
         return ResponseEntity.ok(logEntries);
     }
 
-    @GetMapping("/find-in-logs")
-    public ResponseEntity<?> findInLogs(@RequestBody AuditSearchModel auditSearchModel) {
+//    @GetMapping("/find-in-logs")
+//    public ResponseEntity<?> findInLogs(@RequestBody AuditSearchModel auditSearchModel) {
+//        List<AuditModel> logEntries;
+//        try {
+//            logEntries = auditService.findInLogs(auditSearchModel.getFeature(), auditSearchModel.getFeatureId());
+//        } catch (Exception e) {
+//            return ResponseEntity.internalServerError().body("Error reading logs");
+//        }
+//        return ResponseEntity.ok(logEntries);
+//    }
+
+    @GetMapping("/find-logs")
+    public ResponseEntity<?> findLogs(@RequestBody AuditSearchModel auditSearchModel) {
         List<AuditModel> logEntries;
         try {
-            logEntries = auditService.findInLogs(auditSearchModel.getFeature(), auditSearchModel.getFeatureId());
+            logEntries = auditService.findLogs(auditSearchModel.getFeatureId(), auditSearchModel.getPageSize(), auditSearchModel.getPageNumber());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error reading logs");
         }
