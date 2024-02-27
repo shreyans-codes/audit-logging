@@ -4,18 +4,6 @@
 
     <!-- OVERWRITING DEFAULT PROPERTY -->
     <property name="LOG_FILE" value="log/app.log"/>
-    <!-- JSON FILE APPENDER -->
-    <appender name="JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/other.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- Daily rollover -->
-            <fileNamePattern>log/other.%d{yyyy-MM-dd}.log</fileNamePattern>
-        </rollingPolicy>
-        <encoder>
-            <pattern>[%msg]%n</pattern>
-        </encoder>
-    </appender>
-
 
     <!-- File Appender -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -52,7 +40,7 @@
 
     <!-- Set the log level for your application's package to INFO -->
     <logger name="com.sheru.AuditLogging.Controller.AuditController" level="INFO" additivity="false">
-        <appender-ref ref="JSON"/>
+        <appender-ref ref="FILE"/>
     </logger>
 </configuration>
 

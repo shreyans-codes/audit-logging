@@ -35,11 +35,8 @@ public class AuditService {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger("com.sheru.AuditLogging.Controller.AuditController");
 
-    // todo: use try-catch only where it is really needed
-
     @KafkaListener(topics = "${spring.kafka.consumer.topic-cr}", groupId = "${spring.kafka.consumer.group-id}")
     public void readCRAuditMessage(String message) {
-        try {
             AuditModel auditModel = deserializeMessage(message);
             if (auditModel != null && auditModel.getFeature().equals("Control_Requirement")) {
                 String id = auditModel.getFeature_id();
@@ -53,7 +50,7 @@ public class AuditService {
                 fileAppender.setContext(loggerContext);
                 fileAppender.setFile("logs/" + id + ".log"); // todo: naming of log files during roll overs
 
-                
+
                 PatternLayoutEncoder encoder = new PatternLayoutEncoder();
                 encoder.setPattern("[%msg]%n");
                 encoder.setContext(loggerContext);
@@ -70,9 +67,6 @@ public class AuditService {
                 // Remove the appender to avoid resource leaks
                 dynamicLogger.detachAppender(fileAppender);
             }
-        } catch (Exception e) {
-            logger.error("Error consuming message from Kafka", e);
-        }
     }
 
 

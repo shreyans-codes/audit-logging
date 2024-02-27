@@ -8,12 +8,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 import java.util.List;
 
-enum ACTIONS {
-    CREATE,
-    UPDATE,
-    DELETE
-}
-
 @Builder
 @Getter
 @Setter
@@ -21,14 +15,14 @@ enum ACTIONS {
 public class AuditModel {
 
     String who;
-    DateTimeFormat when;
+    String when;
     String action;
     String feature;
     String feature_id;
     List<FeatureDetails> feature_details;
 
     @JsonCreator
-    public AuditModel(@JsonProperty("who") String who, DateTimeFormat when, @JsonProperty("action") String action, @JsonProperty("feature")String feature, @JsonProperty("feature_id") String feature_id, @JsonProperty("feature_details")List<FeatureDetails> feature_details) {
+    public AuditModel(@JsonProperty("who") String who, @JsonProperty("when") String when, @JsonProperty("action") String action, @JsonProperty("feature")String feature, @JsonProperty("feature_id") String feature_id, @JsonProperty("feature_details")List<FeatureDetails> feature_details) {
         this.who = who;
         this.action = action;
         this.when = when;
