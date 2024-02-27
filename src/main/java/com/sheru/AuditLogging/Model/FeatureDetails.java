@@ -8,15 +8,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FeatureDetails {
-    String id;
-    String field;
+
+    String field_name;
     FeatureChanges feature_changes;
 
     @Override
     public String toString() {
         return "{" +
-                "\"id\":\"" + id + '\"' +
-                ", \"field\":\"" + field + '\"' +
+                ", \"field_name\":\"" + field_name + '\"' +
                 ", \"feature_changes\":" + feature_changes +
                 '}';
     }

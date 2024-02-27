@@ -39,7 +39,7 @@ public class AuditService {
         try {
             AuditModel auditModel = deserializeMessage(message);
             if (auditModel != null && auditModel.getFeature().equals("Control_Requirement")) {
-                String id = auditModel.getFeature_details().getId();
+                String id = auditModel.getFeature_id();
                 String loggerName = "dynamicLogger." + id;
 
                 LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -95,7 +95,7 @@ public class AuditService {
                             return Stream.empty();
                         }
                     })
-                    .filter(entry -> featureId.equals(entry.getFeature_details().getId()))
+                    .filter(entry -> featureId.equals(entry.getFeature_id()))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Directory access error", e);
