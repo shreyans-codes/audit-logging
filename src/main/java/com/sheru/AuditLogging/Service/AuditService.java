@@ -106,6 +106,7 @@ public class AuditService {
         return searchResults;
     }
 
+    // todo: If there are duplicate entries in a file it only return a single log
     public List<AuditModel> readLog(String fileName) {
         String directoryPath = "logs/";
         String logFilePath = directoryPath + fileName;
@@ -129,7 +130,7 @@ public class AuditService {
                             AuditModel logEntry = objectMapper.readValue(json, AuditModel.class);
                             logEntries.add(logEntry);
                         } catch (Exception e) {
-                            System.err.println("Error parsing JSON: " + e.getMessage());
+                            logger.error("Error parsing JSON: " + e.getMessage());
                         }
                         builder = new StringBuilder(); // Reset for the next line
                     }
@@ -146,11 +147,11 @@ public class AuditService {
                     AuditModel logEntry = objectMapper.readValue(json, AuditModel.class);
                     logEntries.add(logEntry);
                 } catch (Exception e) {
-                    System.err.println("Error parsing JSON: " + e.getMessage());
+                    logger.error("Error parsing JSON: " + e.getMessage());
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error reading logs: " + e.getMessage());
+            logger.error("Error reading logs: " + e.getMessage());
         }
 
         // The list is reversed because we read the file from the end
