@@ -32,6 +32,7 @@ public class AuditService {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger("com.sheru.AuditLogging.Controller.AuditController");
 
+    // todo: use try-catch only where it is really needed
 
     @KafkaListener(topics = "${spring.kafka.consumer.topic-cr}", groupId = "${spring.kafka.consumer.group-id}")
     public void readCRAuditMessage(String message) {
@@ -47,7 +48,7 @@ public class AuditService {
                 // Configure appender for this dynamic logger
                 FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
                 fileAppender.setContext(loggerContext);
-                fileAppender.setFile("logs/" + id + ".log");
+                fileAppender.setFile("logs/" + id + ".log"); // todo: naming of log files during roll overs
 
                 PatternLayoutEncoder encoder = new PatternLayoutEncoder();
                 encoder.setPattern("[%msg]%n");
@@ -120,7 +121,7 @@ public class AuditService {
                     // When a new line is found, process the accumulated line (if it's not empty)
                     if (builder.length() > 0) {
                         String logLine = builder.reverse().toString();
-                        String json = logLine.substring(1, logLine.length() - 1); // Adjust based on your log format
+                        String json = logLine.substring(1, logLine.length() - 1);
                         try {
                             AuditModel logEntry = objectMapper.readValue(json, AuditModel.class);
                             logEntries.add(logEntry);

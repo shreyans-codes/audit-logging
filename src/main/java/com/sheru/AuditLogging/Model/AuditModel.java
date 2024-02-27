@@ -1,6 +1,5 @@
 package com.sheru.AuditLogging.Model;
 
-
 import lombok.*;
 
 
@@ -16,6 +15,7 @@ public class AuditModel {
     String feature;
     FeatureDetails feature_details;
 
+    // todo: change the structure of this and make specific str for create and delete
 
     @Override
     public String toString() {
