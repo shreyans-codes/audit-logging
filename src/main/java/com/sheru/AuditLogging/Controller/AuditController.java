@@ -27,7 +27,6 @@ public class AuditController {
         return "Data sent successfully!";
     }
 
-    //todo: this endpoint is taking too much time
     @GetMapping("/find-logs")
     public ResponseEntity<?> findLogs(@RequestBody AuditSearchModel auditSearchModel) {
         List<AuditModel> logEntries;

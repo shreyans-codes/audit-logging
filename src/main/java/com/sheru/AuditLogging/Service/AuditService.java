@@ -6,6 +6,9 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.rolling.RollingPolicy;
+import ch.qos.logback.core.rolling.RolloverFailure;
+import ch.qos.logback.core.rolling.helper.CompressionMode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheru.AuditLogging.Model.AuditModel;
@@ -50,6 +53,7 @@ public class AuditService {
                 fileAppender.setContext(loggerContext);
                 fileAppender.setFile("logs/" + id + ".log"); // todo: naming of log files during roll overs
 
+                
                 PatternLayoutEncoder encoder = new PatternLayoutEncoder();
                 encoder.setPattern("[%msg]%n");
                 encoder.setContext(loggerContext);
@@ -106,7 +110,6 @@ public class AuditService {
         return searchResults;
     }
 
-    // todo: If there are duplicate entries in a file it only return a single log
     public List<AuditModel> readLog(String fileName) {
         String directoryPath = "logs/";
         String logFilePath = directoryPath + fileName;
