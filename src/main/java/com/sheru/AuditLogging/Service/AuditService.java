@@ -33,10 +33,32 @@ public class AuditService {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger("com.sheru.AuditLogging.Controller.AuditController");
 
+    public Boolean validateCRAudit(AuditModel auditModel) {
+        if(auditModel.getAction().toLowerCase().trim().equals("create") || auditModel.getAction().toLowerCase().trim().equals("delete"))
+        {
+            logger.error("Create or Delete operations shouldn't have feature details");
+            //Create and delete operations must not have any feature details
+            //Returns true if feature_details is empty
+            return auditModel.getFeature_details().isEmpty();
+        }
+        else if(auditModel.getAction().toLowerCase().trim().equals("update"))
+        {
+            logger.error("Update operations should have feature details");
+            //Return true of feature_details is not empty
+            return !auditModel.getFeature_details().isEmpty();
+        } else
+            // not a known action type
+            return false;
+    }
     @KafkaListener(topics = "${spring.kafka.consumer.topic-cr}", groupId = "${spring.kafka.consumer.group-id}")
     public void readCRAuditMessage(String message) {
             AuditModel auditModel = deserializeMessage(message);
             if (auditModel != null && auditModel.getFeature().equals("Control_Requirement")) {
+                if(!validateCRAudit(auditModel))
+                {
+                    return;
+                }
+
                 String id = auditModel.getFeature_id();
                 String loggerName = "dynamicLogger." + id;
 
@@ -56,7 +78,7 @@ public class AuditService {
 
                 fileAppender.setEncoder(encoder);
 
-                // Configure rolling policy  todo: we can extract methods
+                // Configure rolling policy
                 FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
                 rollingPolicy.setFileNamePattern("logs/" + id + ".%i.log"); // Set naming pattern for rolled-over files
                 rollingPolicy.setMinIndex(1);
