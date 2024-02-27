@@ -34,14 +34,15 @@ public class AuditService {
     private static final Logger logger = (Logger) LoggerFactory.getLogger("com.sheru.AuditLogging.Controller.AuditController");
 
     public Boolean validateCRAudit(AuditModel auditModel) {
-        if(auditModel.getAction().toLowerCase().trim().equals("create") || auditModel.getAction().toLowerCase().trim().equals("delete"))
+        if(auditModel.getAction().toLowerCase().trim().equals("create"))
         {
-            logger.error("Create or Delete operations shouldn't have feature details");
+            logger.error("Create operation shouldn't have feature details");
             //Create and delete operations must not have any feature details
             //Returns true if feature_details is empty
+            if(auditModel.getFeature_details() == null)
+                return true;
             return auditModel.getFeature_details().isEmpty();
-        }
-        else if(auditModel.getAction().toLowerCase().trim().equals("update"))
+        } else if(auditModel.getAction().toLowerCase().trim().equals("update"))
         {
             logger.error("Update operations should have feature details");
             //Return true of feature_details is not empty

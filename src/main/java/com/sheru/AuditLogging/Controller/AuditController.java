@@ -22,9 +22,9 @@ public class AuditController {
     private KafkaProducerService kafkaProducerService;
 
     @PostMapping("/sendData")
-    public String sendData(@RequestBody String jsonData) {
-        kafkaProducerService.produceMessage(jsonData);
-        return "Data sent successfully!";
+    public ResponseEntity<String> sendData(@RequestBody String jsonData) {
+        ResponseEntity<String> response = kafkaProducerService.produceMessage(jsonData);
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
     @GetMapping("/find-logs")
