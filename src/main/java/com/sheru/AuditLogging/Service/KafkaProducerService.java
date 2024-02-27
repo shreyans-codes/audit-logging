@@ -1,5 +1,7 @@
 package com.sheru.AuditLogging.Service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
@@ -67,6 +69,44 @@ public class KafkaProducerService {
             // Check if feature_details present for DELETE and UPDATE actions
             if ((action.equals("delete") || action.equals("update")) && (!jsonObject.has("feature_details") || jsonObject.get("feature_details").isJsonNull())) {
                 return new ValidationResult(HttpStatus.BAD_REQUEST, "Field 'feature_details' is required for DELETE and UPDATE actions");
+            }
+
+            // Check if all fields are present and not null for DELETE action
+            if (action.equals("delete")) {
+                JsonArray featureDetailsArray = jsonObject.getAsJsonArray("feature_details");
+                if (featureDetailsArray == null || featureDetailsArray.isEmpty()) {
+                    return new ValidationResult(HttpStatus.BAD_REQUEST, "Field 'feature_details' cannot be null or empty for DELETE action");
+                }
+                for (JsonElement element : featureDetailsArray) {
+                    JsonObject featureDetail = element.getAsJsonObject();
+                    if (!featureDetail.has("field_name") || featureDetail.get("field_name").isJsonNull() || featureDetail.get("field_name").getAsString().isEmpty()) {
+                        return new ValidationResult(HttpStatus.BAD_REQUEST, "Field 'field_name' cannot be null or empty inside 'feature_details' for DELETE action");
+                    }
+                }
+            }
+
+            // Check if all fields are present and not null for UPDATE action
+            if (action.equals("update")) {
+                JsonArray featureDetailsArray = jsonObject.getAsJsonArray("feature_details");
+                if (featureDetailsArray == null || featureDetailsArray.isEmpty()) {
+                    return new ValidationResult(HttpStatus.BAD_REQUEST, "Field 'feature_details' cannot be null or empty for UPDATE action");
+                }
+                for (JsonElement element : featureDetailsArray) {
+                    JsonObject featureDetail = element.getAsJsonObject();
+                    if (!featureDetail.has("field_name") || featureDetail.get("field_name").isJsonNull() || featureDetail.get("field_name").getAsString().isEmpty()) {
+                        return new ValidationResult(HttpStatus.BAD_REQUEST, "Field 'field_name' cannot be null or empty inside 'feature_details' for UPDATE action");
+                    }
+                    if (!featureDetail.has("feature_changes") || featureDetail.get("feature_changes").isJsonNull()) {
+                        return new ValidationResult(HttpStatus.BAD_REQUEST, "Field 'feature_changes' is required inside 'feature_details' for UPDATE action");
+                    }
+                    JsonObject featureChanges = featureDetail.getAsJsonObject("feature_changes");
+                    if (!featureChanges.has("prev_state") || featureChanges.get("prev_state").isJsonNull()) {
+                        return new ValidationResult(HttpStatus.BAD_REQUEST, "Field 'prev_state' is required inside 'feature_changes' for UPDATE action");
+                    }
+                    if (!featureChanges.has("new_state") || featureChanges.get("new_state").isJsonNull()) {
+                        return new ValidationResult(HttpStatus.BAD_REQUEST, "Field 'new_state' is required inside 'feature_changes' for UPDATE action");
+                    }
+                }
             }
 
             return new ValidationResult(HttpStatus.OK, "JSON data is valid");
