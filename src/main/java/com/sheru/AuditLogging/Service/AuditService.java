@@ -75,7 +75,7 @@ public class AuditService {
         try {
             return objectMapper.readValue(message, AuditModel.class);
         } catch (JsonProcessingException e) {
-            System.out.println("Error deserializing messages: {" + e.getMessage() + "}");
+            logger.error("Error deserializing messages: {" + e.getMessage() + "}");
             return null;
         }
     }
@@ -88,7 +88,10 @@ public class AuditService {
                     .filter(Files::isRegularFile)
                     .flatMap(file -> {
                         try {
-                            return readLog(file.getFileName().toString()).stream().skip((long) (pageNumber - 1) * pageSize).limit(pageSize);
+                            return readLog(file.getFileName().toString())
+                                    .stream()
+                                    .skip((long) (pageNumber - 1) * pageSize)
+                                    .limit(pageSize);
                         } catch (Exception e) {
                             logger.error("Internal file reading error", e);
                             return Stream.empty();
