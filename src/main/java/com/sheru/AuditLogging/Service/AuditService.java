@@ -56,7 +56,7 @@ public class AuditService {
 
                 fileAppender.setEncoder(encoder);
 
-                // Configure rolling policy  todo: we can extract methods
+                // Configure rolling policy
                 FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
                 rollingPolicy.setFileNamePattern("logs/" + id + ".%i.log"); // Set naming pattern for rolled-over files
                 rollingPolicy.setMinIndex(1);
