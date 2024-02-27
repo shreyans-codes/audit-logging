@@ -5,10 +5,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.FileAppender;
-import ch.qos.logback.core.rolling.RollingPolicy;
-import ch.qos.logback.core.rolling.RolloverFailure;
-import ch.qos.logback.core.rolling.helper.CompressionMode;
+import ch.qos.logback.core.rolling.*;
+import ch.qos.logback.core.util.FileSize;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheru.AuditLogging.Model.AuditModel;
@@ -45,23 +43,44 @@ public class AuditService {
                 LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
                 Logger dynamicLogger = loggerContext.getLogger(loggerName);
 
-                // Configure appender for this dynamic logger
-                FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+                // Configuration for dynamic logger
+                RollingFileAppender<ILoggingEvent> fileAppender = new RollingFileAppender<>();
                 fileAppender.setContext(loggerContext);
-                fileAppender.setFile("logs/" + id + ".log"); // todo: naming of log files during roll overs
+                fileAppender.setFile("logs/" + id + ".log");
 
-
+                // encoder
                 PatternLayoutEncoder encoder = new PatternLayoutEncoder();
                 encoder.setPattern("[%msg]%n");
                 encoder.setContext(loggerContext);
                 encoder.start();
 
                 fileAppender.setEncoder(encoder);
+
+                // Configure rolling policy  todo: we can extract methods
+                FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
+                rollingPolicy.setFileNamePattern("logs/" + id + ".%i.log"); // Set naming pattern for rolled-over files
+                rollingPolicy.setMinIndex(1);
+                rollingPolicy.setMaxIndex(10);
+                rollingPolicy.setParent(fileAppender); // Associate rolling policy with appender
+                rollingPolicy.setContext(loggerContext);
+                rollingPolicy.start();
+                fileAppender.setRollingPolicy(rollingPolicy);
+
+
+                // Set size-based triggering policy
+                SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<>();
+                triggeringPolicy.setMaxFileSize(new FileSize(10 * 1024 * 1024)); // Set maximum file size to 10 megabytes
+                triggeringPolicy.setContext(loggerContext);
+                triggeringPolicy.start();
+                fileAppender.setTriggeringPolicy(triggeringPolicy);
+
                 fileAppender.start();
 
+                // Add appender to logger and set level
                 dynamicLogger.addAppender(fileAppender);
                 dynamicLogger.setLevel(Level.INFO);
 
+                // Log the audit model
                 dynamicLogger.info(auditModel.toString());
 
                 // Remove the appender to avoid resource leaks
