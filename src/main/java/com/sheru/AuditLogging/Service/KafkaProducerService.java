@@ -12,6 +12,6 @@ public class KafkaProducerService {
 
     public void produceMessage(String jsonData) {
         // Send the JSON message to Kafka
-        kafkaTemplate.sendDefault(jsonData);
+        kafkaTemplate.sendDefault(jsonData); //todo: add system dateTime and then send to kafka
     }
 }
