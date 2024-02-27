@@ -13,9 +13,26 @@ public class FeatureChanges {
 
     @Override
     public String toString() {
-        return "{" +
-                "\"prev_state\":" + prev_state +
-                ", \"new_state\":" + new_state +
-                '}';
+        String prev_message;
+        String new_message;
+        String finalMessage = null;
+        if(prev_state!=null)
+        {
+            prev_message = "\"prev_state\":" + prev_state;
+            finalMessage = "{" + prev_message;
+        }
+        if(new_state!=null)
+        {
+            new_message = "\"new_state\":" + new_state;
+            if(finalMessage!=null)
+            {
+                finalMessage = finalMessage + ", " + new_message + "}";
+            } else {
+                finalMessage =  "{" + new_message + "}";
+            }
+        }
+
+
+        return finalMessage;
     }
 }

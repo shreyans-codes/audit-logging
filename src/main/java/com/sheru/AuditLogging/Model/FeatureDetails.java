@@ -15,7 +15,7 @@ public class FeatureDetails {
     @Override
     public String toString() {
         return "{" +
-                ", \"field_name\":\"" + field_name + '\"' +
+                "\"field_name\":\"" + field_name + '\"' +
                 ", \"feature_changes\":" + feature_changes +
                 '}';
     }
