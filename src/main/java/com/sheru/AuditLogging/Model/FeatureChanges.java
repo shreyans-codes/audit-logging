@@ -30,6 +30,9 @@ public class FeatureChanges {
             } else {
                 finalMessage =  "{" + new_message + "}";
             }
+        } else
+        {
+            finalMessage += "}";
         }
 
 
